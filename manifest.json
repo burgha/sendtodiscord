@@ -1,0 +1,23 @@
+  {
+    "name": "Send to Discord",
+    "version": "1.0",
+    "description": "",
+    "manifest_version": 2,
+    "permissions": ["contextMenus", "storage", "tabs"],
+    "background": {
+      "scripts": ["background.js"],
+      "persistent": false
+    },
+    "browser_action": {
+      "default_icon": {
+        "16": "icon16.png",
+        "32": "icon32.png"
+      },
+      "default_popup": "popup.html",
+      "default_title": "Check to see if our code is on this page"
+    },
+    "content_scripts": [{
+      "matches": ["https://oauth.hburger.space/*"],
+      "js": ["oauth.js"]
+    }]
+  }
