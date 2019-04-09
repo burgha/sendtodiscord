@@ -12,11 +12,17 @@ function checkLoginStatus() {
             getUsername(data.discord_token.access_token);
             loggedin = true;
             document.getElementById("loginwithdiscord").innerHTML = "Logout";
-            document.getElementById("login_status").innerHTML = "Status: Eingeloggt als " + username;
+            document.getElementById("login_status").innerHTML = username;
+            document.getElementById("settings").style.visibility = "visible";
+            document.getElementById("login").classList.remove('notloggedin');
+            document.getElementById("login").classList.add('loggedin');
         } else {
             loggedin = false;
-            document.getElementById("loginwithdiscord").innerHTML = "Login";
-            document.getElementById("login_status").innerHTML = "Status: nicht eingeloggt";
+            document.getElementById("loginwithdiscord").innerHTML = "Login with Discord";
+            document.getElementById("login_status").innerHTML = "";
+            document.getElementById("settings").style.visibility = "hidden";
+            document.getElementById("login").classList.remove('loggedin');
+            document.getElementById("login").classList.add('notloggedin');
         }
     });
 }
@@ -31,8 +37,11 @@ function getUsername(token) {
     xhr.send();
     xhr.onload = function (e) {
         if (xhr.readyState === 4) {
-            chrome.storage.sync.set({ username: JSON.parse(xhr.responseText).username });
-            document.getElementById("login_status").innerHTML = "Status: Eingeloggt als " + JSON.parse(xhr.responseText).username;
+            chrome.storage.sync.set({ username: JSON.parse(xhr.responseText).username }, function() {
+                chrome.runtime.sendMessage({type: 'update',  update: 1}, function(response) {
+                });
+            });
+            document.getElementById("login_status").innerHTML = JSON.parse(xhr.responseText).username;
             username = JSON.parse(xhr.responseText).username;
         }
     };
@@ -61,7 +70,11 @@ chrome.storage.sync.get('webHookUrl', function(data) {
 });
 
 document.getElementById("saveSettings").addEventListener("click", function(){
-    chrome.storage.sync.set({ webHookUrl: document.getElementById("webHookUrl").value });
+    getGuildInfo(document.getElementById("webHookUrl").value);
+    chrome.storage.sync.set({ webHookUrl: document.getElementById("webHookUrl").value }, function() {
+        chrome.runtime.sendMessage({type: 'update',  update: 1}, function(response) {
+        });
+    });
 });
 
 document.getElementById("loginwithdiscord").addEventListener("click", function(){
@@ -85,4 +98,17 @@ function logout() {
     chrome.storage.sync.remove('discord_token', function() {
         checkLoginStatus();
     });
+}
+
+function getGuildInfo(webHookUrl) {
+    var xhr = new XMLHttpRequest();
+    
+    xhr.open("GET", webHookUrl, true);
+    xhr.send();
+    
+    xhr.onload = function (e) {
+        if (xhr.readyState === 4) {
+            chrome.extension.getBackgroundPage().console.log(xhr.responseText); 
+        }
+    };
 }

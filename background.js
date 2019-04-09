@@ -1,5 +1,6 @@
 chrome.runtime.onInstalled.addListener(function() {
     var webHookUrl = "";
+    var username = "";
 
     chrome.contextMenus.create({
         id: 'sendimagetodiscord',
@@ -38,12 +39,6 @@ chrome.runtime.onInstalled.addListener(function() {
     });
 
     chrome.contextMenus.onClicked.addListener(function(info, tab) {
-        chrome.storage.sync.get('webHookUrl', function(data) {
-            if ('webHookUrl' in data) {
-                webHookUrl = data.webHookUrl;
-            }
-        });
-
         if (info.menuItemId == "sendimagetodiscord") {
             sendimagetodiscord(info);
         } else if (info.menuItemId == "sendvideotodiscord") {
@@ -60,28 +55,64 @@ chrome.runtime.onInstalled.addListener(function() {
     });
 
     function sendimagetodiscord(info) {
-
+        postToWebhook("**" + username + "**: " + info.srcUrl);
     }
     
     function sendvideotodiscord(info) {
-
+        postToWebhook("**" + username + "**: " + info.srcUrl);
     }
 
     function sendaudiotodiscord(info) {
-
+        postToWebhook("**" + username + "**: " + info.srcUrl);
     }
 
     function sendselectiontodiscord(info) {
-
+        postToWebhook("**" + username + "**: \"*" + info.selectionText + "*\" - " + info.pageUrl);
     }
 
     function sendlinktodiscord(info) {
-
+        postToWebhook("**" + username + "**: " + info.linkUrl);
     }
 
     function sendpagetodiscord(info) {
+        postToWebhook("**" + username + "**: " + info.pageUrl);
+    }
 
+    function postToWebhook(content) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', webHookUrl, true);
+        xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+      
+        data = {
+            content: content,
+        }
+
+        xhr.send(JSON.stringify(data));
+
+        xhr.onload = function (e) {
+            if (xhr.readyState === 4) {
+                console.log(xhr.responseText);
+            }
+        };
     }
 
     console.log(chrome.identity.getRedirectURL());
+
+    chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+        sendResponse({});
+        if (request.type == 'update') {
+            refreshVars();
+        }
+    });
+
+    function refreshVars() {
+        chrome.storage.sync.get('username', function(data) {
+            username = data.username;
+        });
+        chrome.storage.sync.get('webHookUrl', function(data) {
+            webHookUrl = data.webHookUrl;
+        });
+    }
+
+    refreshVars();
 });

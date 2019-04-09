@@ -15,9 +15,5 @@
       },
       "default_popup": "popup.html",
       "default_title": "Check to see if our code is on this page"
-    },
-    "content_scripts": [{
-      "matches": ["https://oauth.hburger.space/*"],
-      "js": ["oauth.js"]
-    }]
+    }
   }
