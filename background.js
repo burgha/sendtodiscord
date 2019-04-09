@@ -83,11 +83,5 @@ chrome.runtime.onInstalled.addListener(function() {
 
     }
 
-    chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-        sendResponse({});
-        if (request.type == 'auth') {
-            console.log(request.token);
-            chrome.storage.sync.set({ discord_token: request.token});
-        }
-    });
+    console.log(chrome.identity.getRedirectURL());
 });

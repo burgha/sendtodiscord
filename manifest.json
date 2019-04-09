@@ -3,7 +3,7 @@
     "version": "1.0",
     "description": "",
     "manifest_version": 2,
-    "permissions": ["contextMenus", "storage", "tabs"],
+    "permissions": ["contextMenus", "storage", "identity", "https://discordapp.com/api/"],
     "background": {
       "scripts": ["background.js"],
       "persistent": false
