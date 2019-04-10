@@ -20,6 +20,7 @@ function checkLoginStatus() {
             document.getElementById("loginwithdiscord").innerHTML = "Logout";
             document.getElementById("login_status").innerHTML = username;
             document.getElementById("settings").style.visibility = "visible";
+            document.getElementById("saveSettings").style.visibility = "visible";
             document.getElementById("login").classList.remove('notloggedin');
             document.getElementById("login").classList.add('loggedin');
         } else {
@@ -27,6 +28,7 @@ function checkLoginStatus() {
             document.getElementById("loginwithdiscord").innerHTML = "Login with Discord";
             document.getElementById("login_status").innerHTML = "";
             document.getElementById("settings").style.visibility = "hidden";
+            document.getElementById("saveSettings").style.visibility = "hidden";
             document.getElementById("login").classList.remove('loggedin');
             document.getElementById("login").classList.add('notloggedin');
         }

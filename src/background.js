@@ -1,16 +1,16 @@
-var webhook_is_valid = false;
-
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-    sendResponse({});
-    if (request.type == 'set_webhook_valid') {
-        webhook_is_valid = request.valid;
-        console.log(request, webhook_is_valid);
-    }
-});
-
 chrome.runtime.onInstalled.addListener(function() {
     var webHookUrl = "";
     var username = "";
+
+    var webhook_is_valid = true;
+
+    chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+        sendResponse({});
+        if (request.type == 'set_webhook_valid') {
+            webhook_is_valid = request.valid;
+            console.log(request, webhook_is_valid);
+        }
+    });
 
     chrome.contextMenus.create({
         id: 'sendimagetodiscord',
@@ -49,6 +49,7 @@ chrome.runtime.onInstalled.addListener(function() {
     });
 
     chrome.contextMenus.onClicked.addListener(function(info, tab) {
+        console.log(webHookUrl);
         if (info.menuItemId == "sendimagetodiscord") {
             sendimagetodiscord(info);
         } else if (info.menuItemId == "sendvideotodiscord") {
