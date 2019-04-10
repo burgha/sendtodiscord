@@ -1,8 +1,14 @@
 var loggedin = false;
 var username;
 
-chrome.storage.sync.get('username', function(data) {
+chrome.storage.sync.get(['username', 'webHookInfo', 'webHookUrl'], function(data) {
     username = data.username;
+    if('webHookUrl' in data) {
+        document.getElementById("webHookUrl").value = data.webHookUrl;
+    }
+    if('webHookInfo' in data) {
+        document.getElementById('webHookInfo').innerHTML = data.webHookInfo;
+    }
 });
 
 function checkLoginStatus() {
@@ -63,16 +69,12 @@ function getToken(code) {
     };
 }
 
-chrome.storage.sync.get('webHookUrl', function(data) {
-    if ('webHookUrl' in data) {
-        document.getElementById("webHookUrl").value = data.webHookUrl;
-    }
-});
-
 document.getElementById("saveSettings").addEventListener("click", function(){
-    getGuildInfo(document.getElementById("webHookUrl").value);
-    chrome.storage.sync.set({ webHookUrl: document.getElementById("webHookUrl").value }, function() {
-        chrome.runtime.sendMessage({type: 'update',  update: 1}, function(response) {
+    chrome.storage.sync.remove(['webHookInfo'], function() {
+        chrome.storage.sync.set({ webHookUrl: document.getElementById("webHookUrl").value }, function() {
+            chrome.runtime.sendMessage({type: 'update',  update: 1}, function(response) {
+            });
+            getGuildInfo();
         });
     });
 });
@@ -86,7 +88,7 @@ document.getElementById("loginwithdiscord").addEventListener("click", function()
 });
 
 function login() {
-    var url = "https://discordapp.com/api/oauth2/authorize?client_id=564897958210961427&redirect_uri=" + chrome.identity.getRedirectURL() + "&response_type=code&scope=identify";
+    var url = "https://discordapp.com/api/oauth2/authorize?client_id=564897958210961427&redirect_uri=" + chrome.identity.getRedirectURL() + "&response_type=code&scope=identify%20guilds";
     chrome.identity.launchWebAuthFlow({url: url, interactive: true}, function(res){
         var url = new URL(res);
         var code = url.searchParams.get("code");
@@ -100,15 +102,70 @@ function logout() {
     });
 }
 
-function getGuildInfo(webHookUrl) {
-    var xhr = new XMLHttpRequest();
-    
-    xhr.open("GET", webHookUrl, true);
-    xhr.send();
-    
-    xhr.onload = function (e) {
-        if (xhr.readyState === 4) {
-            chrome.extension.getBackgroundPage().console.log(xhr.responseText); 
+function getGuildInfo() { 
+    chrome.runtime.sendMessage({type: 'set_webhook_valid',  valid: false}, function(response) {
+    });
+    document.getElementById('webHookInfo').innerHTML = "";
+    chrome.storage.sync.get('webHookUrl', function(data) {
+        if ('webHookUrl' in data) {
+            var xhr = new XMLHttpRequest();
+            
+            xhr.open("GET", data.webHookUrl, true);
+            xhr.send();
+            
+            xhr.onload = function (e) {
+                if (xhr.readyState === 4) {
+                    chrome.storage.sync.get('discord_token', function(data) {
+                        if ('discord_token' in data) {
+                            if (xhr.status === 200 && xhr.getResponseHeader('content-type') === 'application/json' && 'name' in JSON.parse(xhr.responseText)) {
+                                chrome.extension.getBackgroundPage().console.log('valid');
+                                chrome.runtime.sendMessage({type: 'set_webhook_valid',  valid: true}, function(response) {
+                                });
+                                var guild_id = JSON.parse(xhr.responseText).guild_id;
+                                var webHookId = JSON.parse(xhr.responseText).id;
+                                var webHookAvatar = JSON.parse(xhr.responseText).avatar;
+                                var webHookName = JSON.parse(xhr.responseText).name;
+                                var xhr2 = new XMLHttpRequest();
+                        
+                                xhr2.open("GET", "https://discordapp.com/api/users/@me/guilds", true);
+                                xhr2.setRequestHeader('Authorization', 'Bearer ' + data.discord_token.access_token);
+                                chrome.extension.getBackgroundPage().console.log(xhr2.responseText);
+                                xhr2.send();
+                                
+                                xhr2.onload = function (e) {
+                                    if (xhr2.readyState === 4) {
+                                        chrome.extension.getBackgroundPage().console.log(xhr2.responseText);
+                                        var guilds = JSON.parse(xhr2.responseText);
+                                        guilds.forEach(element => {
+                                            if (element.id == guild_id) {
+                                                chrome.extension.getBackgroundPage().console.log(element.name);
+                                                var info = "<p><span class='bold'>Webhook erkannt:</span></p> <br> <img id='avatar' src='https://cdn.discordapp.com/avatars/"+ webHookId +" / "+ webHookAvatar +".png'>" + '<p id="webHookName">' + element.name + "/" + webHookName + "</p>";
+                                                chrome.storage.sync.set({ webHookInfo: info }, function() {
+                                                });
+                                                document.getElementById('webHookInfo').innerHTML = info;
+                                            }
+                                        });                      
+                                    }
+                                };
+                            } else {
+                                chrome.extension.getBackgroundPage().console.log('invalid');
+                                document.getElementById('webHookInfo').innerHTML = "";
+                                chrome.runtime.sendMessage({type: 'set_webhook_valid',  valid: false}, function(response) {
+                                });
+                            }
+                        }
+                    });
+                }
+            };
+
+            xhr.onerror = function(e) {
+                chrome.extension.getBackgroundPage().console.log('invalid');
+                document.getElementById('webHookInfo').innerHTML = "";
+                chrome.runtime.sendMessage({type: 'set_webhook_valid',  valid: false}, function(response) {
+                });
+            }
         }
-    };
+    });
 }
+
+getGuildInfo();

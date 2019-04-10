@@ -1,19 +1,24 @@
   {
     "name": "Send to Discord",
     "version": "1.0",
-    "description": "",
+    "description": "Quickly send links to Pages, Images, Text-Selections, etc. to a Discord channel via a WebHook",
     "manifest_version": 2,
     "permissions": ["contextMenus", "storage", "identity", "https://discordapp.com/api/"],
     "background": {
       "scripts": ["background.js"],
       "persistent": false
     },
+    "icons": { 
+      "16": "icon16.png",
+      "48": "icon48.png",
+     "128": "icon128.png"
+    },
     "browser_action": {
       "default_icon": {
         "16": "icon16.png",
-        "32": "icon32.png"
+        "48": "icon48.png",
+       "128": "icon128.png"
       },
-      "default_popup": "popup.html",
-      "default_title": "Check to see if our code is on this page"
+      "default_popup": "popup.html"
     }
   }

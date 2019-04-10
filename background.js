@@ -1,3 +1,13 @@
+var webhook_is_valid = false;
+
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+    sendResponse({});
+    if (request.type == 'set_webhook_valid') {
+        webhook_is_valid = request.valid;
+        console.log(request, webhook_is_valid);
+    }
+});
+
 chrome.runtime.onInstalled.addListener(function() {
     var webHookUrl = "";
     var username = "";
@@ -115,4 +125,5 @@ chrome.runtime.onInstalled.addListener(function() {
     }
 
     refreshVars();
+
 });

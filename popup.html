@@ -2,30 +2,36 @@
 <html>
   <head>
     <style>
+      @import url('https://fonts.googleapis.com/css?family=Montserrat:300,500,700');
+
       body {
         background: #2C2F33;
         margin: 0px;
         padding: 0px;
-        width: 300px;
+        width: 400px;
+        height: 300px;
         color: white;
-        font-family: sans-serif;
+        font-family: 'montserrat', sans-serif;
         font-weight: 300;
+        font-size: 16px;
       }
 
       button {
         position: relative;
         display: block;
-        padding: 5px;
         border: 0px;
         box-shadow: 0px;
         background: #7289DA;
         color: white;
         border-radius: 5px;
-        height: 25px;
+        height: 40px;
+        width: 80px;
+        font-size: 16px;
+        font-weight: 500;
       }
 
       #login p {
-        margin-right: 5px;
+        margin-right: 10px;
       }
 
       #login.notloggedin {
@@ -42,7 +48,7 @@
 
       #login.loggedin {
         position: absolute;
-        top: 0px;
+        top: 15px;
         left: 5%;
         display: flex;
         width: 90%;
@@ -53,7 +59,7 @@
 
       form {
         width: 90%;
-        margin: 60px 5% 0px 5%;
+        margin: 80px 5% 0px 5%;
         padding-bottom: 5%;
         visibility: hidden;
       }
@@ -67,9 +73,30 @@
         color: white;
       }
 
-      form label, form input {
+      #avatar {
+        margin-top: -20px;
+        width: 50px;
+        height: 50px;
+        border-radius: 100%;
+        float: left;
+      }
+
+      #webHookName {
+        margin: -5px 0 0 65px;
+      }
+
+      form label, form input{
         width: 100%;
-        margin: 2px 0px;
+        margin: 5px 0px;
+      }
+
+      form p {
+        margin-top: 15px;
+      }
+
+      #saveSettings {
+        position: absolute;
+        bottom: 20px;
       }
 
       .centered {
@@ -78,18 +105,23 @@
         transform: translateX(-50%);
       }
 
+      .bold {
+        font-weight: 700;
+      }
+
     </style>
   </head>
   <body>
     <div id="login">
       <p id="login_status">Status: Nicht eingeloggt</p>
-      <button id="loginwithdiscord">login with discord</button>
+      <button id="loginwithdiscord">Login with Discord</button>
     </div>
     <form id="settings">
-      <label for="webHookUrl">Webhook URL</label>
+      <label for="webHookUrl" class="bold">Webhook URL</label>
       <input type="text" id="webHookUrl" name="webHookUrl">
-      <button id="saveSettings" class="centered">Save</button>
+      <div id="webHookInfo"></div>
     </form>
+    <button id="saveSettings" class="centered">Save</button>
     <script src="popup.js"></script>
   </body>
 </html>
