@@ -120,7 +120,6 @@ function getGuildInfo() {
                     chrome.storage.sync.get('discord_token', function(data) {
                         if ('discord_token' in data) {
                             if (xhr.status === 200 && xhr.getResponseHeader('content-type') === 'application/json' && 'name' in JSON.parse(xhr.responseText)) {
-                                chrome.extension.getBackgroundPage().console.log('valid');
                                 chrome.runtime.sendMessage({type: 'set_webhook_valid',  valid: true}, function(response) {
                                 });
                                 var guild_id = JSON.parse(xhr.responseText).guild_id;
@@ -140,8 +139,7 @@ function getGuildInfo() {
                                         var guilds = JSON.parse(xhr2.responseText);
                                         guilds.forEach(element => {
                                             if (element.id == guild_id) {
-                                                chrome.extension.getBackgroundPage().console.log(element.name);
-                                                var info = "<p><span class='bold'>Webhook erkannt:</span></p> <br> <img id='avatar' src='https://cdn.discordapp.com/avatars/"+ webHookId +" / "+ webHookAvatar +".png'>" + '<p id="webHookName">' + element.name + "/" + webHookName + "</p>";
+                                                var info = "<p><span class='bold'>Webhook erkannt:</span></p> <br> <img id='avatar' src='https://cdn.discordapp.com/avatars/"+ webHookId +"/"+ webHookAvatar +".png'>" + '<p id="webHookName">' + element.name + " / " + webHookName + "</p>";
                                                 chrome.storage.sync.set({ webHookInfo: info }, function() {
                                                 });
                                                 document.getElementById('webHookInfo').innerHTML = info;
@@ -150,7 +148,6 @@ function getGuildInfo() {
                                     }
                                 };
                             } else {
-                                chrome.extension.getBackgroundPage().console.log('invalid');
                                 document.getElementById('webHookInfo').innerHTML = "";
                                 chrome.runtime.sendMessage({type: 'set_webhook_valid',  valid: false}, function(response) {
                                 });
@@ -161,7 +158,6 @@ function getGuildInfo() {
             };
 
             xhr.onerror = function(e) {
-                chrome.extension.getBackgroundPage().console.log('invalid');
                 document.getElementById('webHookInfo').innerHTML = "";
                 chrome.runtime.sendMessage({type: 'set_webhook_valid',  valid: false}, function(response) {
                 });
