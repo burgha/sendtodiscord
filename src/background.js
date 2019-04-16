@@ -1,3 +1,41 @@
+chrome.runtime.onInstalled.addListener(function() {
+    chrome.contextMenus.create({
+        id: 'sendimagetodiscord',
+        title: "Send Image To Discord",
+        contexts:["image"],
+    });
+    
+    chrome.contextMenus.create({
+        id: 'sendvideotodiscord',
+        title: "Send Video To Discord",
+        contexts:["video"],
+    });
+    
+    chrome.contextMenus.create({
+        id: 'sendaudiodiscord',
+        title: "Send Audio To Discord",
+        contexts:["audio"],
+    });
+    
+    chrome.contextMenus.create({
+        id: 'sendselectiontodiscord',
+        title: "Send Selection To Discord",
+        contexts:["selection"],
+    });
+    
+    chrome.contextMenus.create({
+        id: 'sendlinktodiscord',
+        title: "Send Link To Discord",
+        contexts:["link"],
+    });
+    
+    chrome.contextMenus.create({
+        id: 'sendpagetodiscord',
+        title: "Send Page To Discord",
+        contexts:["page"],
+    });
+});
+
 var webHookUrl = "";
 var username = "";
 
@@ -9,42 +47,6 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         webhook_is_valid = request.valid;
         console.log(request, webhook_is_valid);
     }
-});
-
-chrome.contextMenus.create({
-    id: 'sendimagetodiscord',
-    title: "Send Image To Discord",
-    contexts:["image"],
-});
-
-chrome.contextMenus.create({
-    id: 'sendvideotodiscord',
-    title: "Send Video To Discord",
-    contexts:["video"],
-});
-
-chrome.contextMenus.create({
-    id: 'sendaudiodiscord',
-    title: "Send Audio To Discord",
-    contexts:["audio"],
-});
-
-chrome.contextMenus.create({
-    id: 'sendselectiontodiscord',
-    title: "Send Selection To Discord",
-    contexts:["selection"],
-});
-
-chrome.contextMenus.create({
-    id: 'sendlinktodiscord',
-    title: "Send Link To Discord",
-    contexts:["link"],
-});
-
-chrome.contextMenus.create({
-    id: 'sendpagetodiscord',
-    title: "Send Page To Discord",
-    contexts:["page"],
 });
 
 chrome.contextMenus.onClicked.addListener(function(info, tab) {
