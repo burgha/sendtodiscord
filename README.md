@@ -4,6 +4,7 @@
 
 ## Installation:
 **Chrome Web Store:** https://chrome.google.com/webstore/detail/fdhmmlghpocfmbcjhjjhnjhbbnigaiin/
+
 **Firefox Addon:** https://addons.mozilla.org/de/firefox/addon/sendtodiscord/
 
 ## Usage:
