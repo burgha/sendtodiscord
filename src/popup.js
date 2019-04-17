@@ -1,4 +1,5 @@
 var loggedin = false;
+var manual_loggedin = false;
 var username;
 
 chrome.storage.sync.get(['username', 'webHookInfo', 'webHookUrl'], function(data) {
@@ -12,10 +13,21 @@ chrome.storage.sync.get(['username', 'webHookInfo', 'webHookUrl'], function(data
 });
 
 function checkLoginStatus() {
-    chrome.storage.sync.get('discord_token', function(data) {
+    chrome.storage.sync.get(['discord_token', 'username'], function(data) {
         document.getElementById("login_status").value = data;
-        if ('discord_token' in data) {
-            getUsername(data.discord_token.access_token);
+        if ('discord_token' in data || 'username' in data) {
+            if ('discord_token' in data) {
+                getUsername(data.discord_token.access_token);
+                document.getElementById("username").style.visibility = "hidden";
+                document.getElementById("username_label").style.visibility = "hidden";
+            } else {
+                manual_loggedin = true;
+                username = data.username;
+                document.getElementById("login_status").innerHTML = username;
+                document.getElementById("username").value = username;
+                document.getElementById("username").style.visibility = "visible";
+                document.getElementById("username_label").style.visibility = "visible";
+            }
             loggedin = true;
             document.getElementById("loginwithdiscord").innerHTML = "Logout";
             document.getElementById("login_status").innerHTML = username;
@@ -23,12 +35,16 @@ function checkLoginStatus() {
             document.getElementById("saveSettings").style.visibility = "visible";
             document.getElementById("login").classList.remove('notloggedin');
             document.getElementById("login").classList.add('loggedin');
+            document.getElementById("manual_login").style.visibility = "hidden";
+            document.getElementById("settings").style.visibility = "visible";
         } else {
             loggedin = false;
             document.getElementById("loginwithdiscord").innerHTML = "Login with Discord";
             document.getElementById("login_status").innerHTML = "";
             document.getElementById("settings").style.visibility = "hidden";
             document.getElementById("saveSettings").style.visibility = "hidden";
+            document.getElementById("username").style.visibility = "hidden";
+            document.getElementById("manual_login").style.visibility = "visible";
             document.getElementById("login").classList.remove('loggedin');
             document.getElementById("login").classList.add('notloggedin');
         }
@@ -73,10 +89,24 @@ function getToken(code) {
 
 document.getElementById("saveSettings").addEventListener("click", function(){
     chrome.storage.sync.remove(['webHookInfo'], function() {
+        if (manual_loggedin) {
+            chrome.storage.sync.set({ webHookUrl: document.getElementById("webHookUrl").value, username: document.getElementById("username").value }, function() {
+                chrome.runtime.sendMessage({type: 'update',  update: 1}, function(response) {
+                });
+                username = document.getElementById("username").value;
+                document.getElementById("login_status").innerHTML = username;
+                document.getElementById('webHookInfo').innerHTML = "";
+            });
+        } else {
+            chrome.storage.sync.set({ webHookUrl: document.getElementById("webHookUrl").value }, function() {
+                chrome.runtime.sendMessage({type: 'update',  update: 1}, function(response) {
+                });
+                getGuildInfo();
+            });
+        }
         chrome.storage.sync.set({ webHookUrl: document.getElementById("webHookUrl").value }, function() {
             chrome.runtime.sendMessage({type: 'update',  update: 1}, function(response) {
             });
-            getGuildInfo();
         });
     });
 });
@@ -89,17 +119,34 @@ document.getElementById("loginwithdiscord").addEventListener("click", function()
     }
 });
 
+document.getElementById("manual_login").addEventListener("click", function(){
+    loggedin = true;
+    manual_loggedin = true;
+    document.getElementById("loginwithdiscord").innerHTML = "Logout";
+    document.getElementById("login_status").innerHTML = "";
+    document.getElementById("settings").style.visibility = "visible";
+    document.getElementById("saveSettings").style.visibility = "visible";
+    document.getElementById("login").classList.remove('notloggedin');
+    document.getElementById("login").classList.add('loggedin');
+    document.getElementById("manual_login").style.visibility = "hidden";
+    document.getElementById("settings").style.visibility = "visible";
+    document.getElementById("username").style.visibility = "visible";
+});
+
 function login() {
     var url = "https://discordapp.com/api/oauth2/authorize?client_id=564897958210961427&redirect_uri=" + chrome.identity.getRedirectURL() + "&response_type=code&scope=identify%20guilds";
     chrome.identity.launchWebAuthFlow({url: url, interactive: true}, function(res){
         var url = new URL(res);
+        chrome.extension.getBackgroundPage().console.log(res);
         var code = url.searchParams.get("code");
         getToken(code);
     });
 }
 
 function logout() {
-    chrome.storage.sync.remove('discord_token', function() {
+    chrome.storage.sync.remove(['discord_token', 'username'], function() {
+        manual_loggedin = false;
+        loggedin = false;
         checkLoginStatus();
     });
 }

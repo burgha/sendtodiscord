@@ -128,3 +128,5 @@ function refreshVars() {
 }
 
 refreshVars();
+
+console.log(chrome.identity.getRedirectURL());

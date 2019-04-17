@@ -9,7 +9,7 @@
         margin: 0px;
         padding: 0px;
         width: 400px;
-        height: 300px;
+        height: 350px;
         color: white;
         font-family: 'montserrat', sans-serif;
         font-weight: 300;
@@ -55,6 +55,16 @@
         height: 50px;
         justify-content: flex-end;
         align-items: center;
+      }
+
+      #manual_login {
+        font-size: 16px;
+        width: 100%;
+        cursor: pointer;
+      }
+
+      #manual_login:hover {
+        text-decoration: underline;
       }
 
       form {
@@ -116,8 +126,11 @@
     <div id="login">
       <p id="login_status">Status: Nicht eingeloggt</p>
       <button id="loginwithdiscord">Login with Discord</button>
+      <p class="centered" id="manual_login">Alternativ: Benutzername manuell eingeben</p>
     </div>
     <form id="settings">
+      <label for="username" id="username_label" class="bold">Username</label>
+      <input type="text" id="username" name="username">
       <label for="webHookUrl" class="bold">Webhook URL</label>
       <input type="text" id="webHookUrl" name="webHookUrl">
       <div id="webHookInfo"></div>
