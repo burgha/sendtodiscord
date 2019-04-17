@@ -2,6 +2,10 @@
 
 # Browser Extension to quickly send links to Pages, Images, Text-Selections, etc. to a Discord Channel via a WebHook
 
+## Installation:
+**Chrome Web Store:** https://chrome.google.com/webstore/detail/fdhmmlghpocfmbcjhjjhnjhbbnigaiin/
+**Firefox Addon:** https://addons.mozilla.org/de/firefox/addon/sendtodiscord/
+
 ## Usage:
 1. Create a Webhook for your Discord-Channel (via Server-Properties > Webhooks) and copy its URL.
 1. Install the extension and log into your Discord Account
