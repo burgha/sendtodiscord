@@ -1,6 +1,6 @@
 # Send To Discord
 
-# Browser Extension to quickly send links to Pages, Images, Text-Selections, etc. to a Discord Channel via a WebHook
+**Browser Extension to quickly send links to Pages, Images, Text-Selections, etc. to a Discord Channel via a WebHook**
 
 ## Installation:
 **Chrome Web Store:** https://chrome.google.com/webstore/detail/fdhmmlghpocfmbcjhjjhnjhbbnigaiin/
