@@ -57,11 +57,15 @@ function getUsername(token) {
     var xhr = new XMLHttpRequest();
 
     xhr.open("GET", "https://discordapp.com/api/users/@me", true);
-    xhr.setRequestHeader('Authorization', 'Bearer ' + token);
-    xhr.send();
+    xhr.setRequestHeader('Authorization', 'Bearer ' + token + "asdfg");
     xhr.onload = function (e) {
         if (xhr.readyState === 4) {
-            chrome.storage.sync.set({ username: JSON.parse(xhr.responseText).username }, function() {
+            chrome.extension.getBackgroundPage().console.log(xhr.responseText);
+            var username = JSON.parse(xhr.responseText).username;
+            if(username === undefined) {
+                return;
+            }
+            chrome.storage.sync.set({ username: username }, function() {
                 chrome.runtime.sendMessage({type: 'update',  update: 1}, function(response) {
                 });
             });
@@ -69,6 +73,7 @@ function getUsername(token) {
             username = JSON.parse(xhr.responseText).username;
         }
     };
+    xhr.send();
 }
 
 function getToken(code) {
@@ -76,8 +81,6 @@ function getToken(code) {
     
     xhr.open("POST", "https://discordapp.com/api/oauth2/token", true);
     xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-    xhr.send("client_id=564897958210961427&client_secret=6DU7Kptjfv975HIt6-P_QuajUjT4Aq-W&code=" + code + "&redirect_uri=" + chrome.identity.getRedirectURL() + "&scope=identify&grant_type=authorization_code");
-    
     xhr.onload = function (e) {
         if (xhr.readyState === 4) {
             chrome.storage.sync.set({ discord_token: JSON.parse(xhr.responseText)}, function() {
@@ -85,6 +88,7 @@ function getToken(code) {
             });
         }
     };
+    xhr.send("client_id=564897958210961427&client_secret=6DU7Kptjfv975HIt6-P_QuajUjT4Aq-W&code=" + code + "&redirect_uri=" + chrome.identity.getRedirectURL() + "&scope=identify&grant_type=authorization_code");
 }
 
 document.getElementById("saveSettings").addEventListener("click", function(){
@@ -98,7 +102,7 @@ document.getElementById("saveSettings").addEventListener("click", function(){
                 document.getElementById('webHookInfo').innerHTML = "";
             });
         } else {
-            chrome.storage.sync.set({ webHookUrl: document.getElementById("webHookUrl").value }, function() {
+            chrome.storage.sync.set({ webHookUrl: document.getElementById("webHookUrl").value, webHookName: undefined }, function() {
                 chrome.runtime.sendMessage({type: 'update',  update: 1}, function(response) {
                 });
                 getGuildInfo();
@@ -157,14 +161,12 @@ function getGuildInfo() {
     document.getElementById('webHookInfo').innerHTML = "";
     chrome.storage.sync.get('webHookUrl', function(data) {
         if ('webHookUrl' in data) {
+            var webHookUrl = data.webHookUrl;
             var xhr = new XMLHttpRequest();
-            
-            xhr.open("GET", data.webHookUrl, true);
-            xhr.send();
-            
-            xhr.onload = function (e) {
+            xhr.open("GET", webHookUrl, true);
+            xhr.onload = function() {
                 if (xhr.readyState === 4) {
-                    chrome.storage.sync.get('discord_token', function(data) {
+                    chrome.storage.sync.get(['discord_token', 'webHookName', 'webHookInfo'], function(data) {
                         if ('discord_token' in data) {
                             if (xhr.status === 200 && xhr.getResponseHeader('content-type') === 'application/json' && 'name' in JSON.parse(xhr.responseText)) {
                                 chrome.runtime.sendMessage({type: 'set_webhook_valid',  valid: true}, function(response) {
@@ -173,29 +175,34 @@ function getGuildInfo() {
                                 var webHookId = JSON.parse(xhr.responseText).id;
                                 var webHookAvatar = JSON.parse(xhr.responseText).avatar;
                                 var webHookName = JSON.parse(xhr.responseText).name;
+                                
                                 var xhr2 = new XMLHttpRequest();
-                        
                                 xhr2.open("GET", "https://discordapp.com/api/users/@me/guilds", true);
                                 xhr2.setRequestHeader('Authorization', 'Bearer ' + data.discord_token.access_token);
-                                chrome.extension.getBackgroundPage().console.log(xhr2.responseText);
-                                xhr2.send();
-                                
-                                xhr2.onload = function (e) {
+                                xhr2.onload = function() {
                                     if (xhr2.readyState === 4) {
                                         chrome.extension.getBackgroundPage().console.log(xhr2.responseText);
                                         var guilds = JSON.parse(xhr2.responseText);
+                                        if("code" in guilds) {
+                                            // if current webhook is not equal to last successful fetched and token is not valid show error
+                                            if(webHookName !== data.webHookName || data.webHookInfo === undefined) {
+                                                document.getElementById('webHookInfo').innerHTML = "<span class='form_error'>Api access token expired: Could not retrieve data from the Discord Api. <b>Please logout and login again.</b></span>";
+                                            }
+                                            return;
+                                        }
                                         guilds.forEach(element => {
                                             if (element.id == guild_id) {
                                                 var info = "<p><span class='bold'>Webhook erkannt:</span></p> <br> <img id='avatar' src='https://cdn.discordapp.com/avatars/"+ webHookId +"/"+ webHookAvatar +".png'>" + '<p id="webHookName">' + element.name + " / " + webHookName + "</p>";
-                                                chrome.storage.sync.set({ webHookInfo: info }, function() {
+                                                chrome.storage.sync.set({ webHookInfo: info, webHookName: webHookName }, function() {
                                                 });
                                                 document.getElementById('webHookInfo').innerHTML = info;
                                             }
                                         });                      
                                     }
                                 };
+                                xhr2.send();
                             } else {
-                                document.getElementById('webHookInfo').innerHTML = "";
+                                document.getElementById('webHookInfo').innerHTML = "<span class='form_error'>Webhook not recognized. Please check that you entered the correct URL.</span>";
                                 chrome.runtime.sendMessage({type: 'set_webhook_valid',  valid: false}, function(response) {
                                 });
                             }
@@ -209,6 +216,7 @@ function getGuildInfo() {
                 chrome.runtime.sendMessage({type: 'set_webhook_valid',  valid: false}, function(response) {
                 });
             }
+            xhr.send();
         }
     });
 }
