@@ -57,7 +57,7 @@ function getUsername(token) {
     var xhr = new XMLHttpRequest();
 
     xhr.open("GET", "https://discordapp.com/api/users/@me", true);
-    xhr.setRequestHeader('Authorization', 'Bearer ' + token + "asdfg");
+    xhr.setRequestHeader('Authorization', 'Bearer ' + token);
     xhr.onload = function (e) {
         if (xhr.readyState === 4) {
             chrome.extension.getBackgroundPage().console.log(xhr.responseText);

@@ -1,6 +1,6 @@
   {
     "name": "Send to Discord",
-    "version": "1.2",
+    "version": "1.2.2",
     "description": "Quickly send links to Pages, Images, Text-Selections, etc. to a Discord channel via a WebHook",
     "manifest_version": 2,
 	"homepage_url": "https://github.com/burgha/sendtodiscord",
